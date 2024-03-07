@@ -9,9 +9,15 @@ namespace Four_Corners.Service
 {
     public class GameService : IGameService
     {
-        private IMatch Partida { get; set; }
+        private IMatch Match { get; set; }
+        private IBoard Board { get; set; }
 
         public GameService()
+        {
+            
+        }
+
+        private void CreateBoard()
         {
             
         }
@@ -19,26 +25,26 @@ namespace Four_Corners.Service
         public void CreateMatch()
         {
             var spawnerList = new List<ISpawner>();
-            foreach (ElfColor color in Enum.GetValues(typeof(ElfColor)))
+            for(int idx = 0; idx < Enum.GetValues(typeof(ElfColor)).Length; idx++)
             {
-                spawnerList.Add(Factory.CreateSpawner(color, (int)color, (int)color));
+                spawnerList.Add(Factory.CreateSpawner((ElfColor)idx, Board.Tiles[idx]));
             }
-            Partida = Factory.CreatePartida(spawnerList);
-            Partida.StartMatch();
+            Match = Factory.CreatePartida(spawnerList);
+            Match.StartMatch();
         }
 
         public async Task StartGame()
         {
-            while (Partida.Elves.Count > 2)
+            while (Match.Elves.Count > 2)
             {
-                if (Partida.Elves.Count <= 1)
+                if (Match.Elves.Count <= 1)
                 {
                     break;
                 }
 
                 await Task.Delay(new System.Random().Next(1000, 5000));
                 Debug.Log("New elf alive");
-                Partida.SpawnNewElfFromSpawner();
+                Match.SpawnNewElfFromSpawner();
             }
         }
 
@@ -46,7 +52,7 @@ namespace Four_Corners.Service
         //Could create an elf from a spawner or from the collision of same color elves
         private void SpawnElf(ElfColor newColor, int originX, int originY)
         {
-            Partida.SpawnNewElfFromSpawner();
+            Match.SpawnNewElfFromSpawner();
         }
 
         public static ElfColor ChooseNewColor()

@@ -9,33 +9,31 @@ namespace Four_Corners.Domain
         public System.Guid Id { get; }
         public ElfColor Color { get; private set; }
 
-        public int PosX { get; private set; }
-        public int PosY { get; private set; }
         public bool Alive { get; private set; }
+
+        public ITile CurrentTile { get; private set; }
 
         private Elf()
         {
             Id = System.Guid.Empty;
             Color = ElfColor.Unknown;
-            PosX = -1;
-            PosY = -1;
         }
 
-        public Elf(ElfColor color, int posX, int posY)
+        public Elf(ElfColor color, ITile currentTile)
         {
             Id = System.Guid.NewGuid();
             Color = color;
-            PosX = posX;
-            PosY = posY;
+            CurrentTile = currentTile;
             Alive = true;
 
             Task.Run(LifeCicle);
         }
 
-        public void Move(int newX, int newY)
+        public bool Move(ITile tile)
         {
-            PosX = newX;
-            PosY = newY;
+            CurrentTile = tile;
+            Debug.Log($"Ops! The sit is taken? {tile.Occupied}");
+            return !tile.Occupied;
         }
 
         public async Task LifeCicle()
@@ -58,6 +56,11 @@ namespace Four_Corners.Domain
 
                 Debug.Log($"[DEAD] I WAS elf {Color}-{Id}");
             }
+        }
+
+        public void Kill()
+        {
+            Alive = false;
         }
     }
 }

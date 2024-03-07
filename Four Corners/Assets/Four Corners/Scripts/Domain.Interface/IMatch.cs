@@ -8,7 +8,7 @@ namespace Four_Corners.Domain.Interface
         IList<ISpawner> Spawners { get; }
 
         void SpawnNewElfFromSpawner();
-        void SpawnNewElf(ElfColor color, int sourceX, int sourceY);
+        void SpawnNewElf(ElfColor color, ITile sourceTile);
         void StartMatch();
     }
 }

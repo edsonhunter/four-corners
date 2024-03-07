@@ -27,7 +27,7 @@ namespace Four_Corners.Domain
         {
             foreach(var spw in Spawners)
             {
-                SpawnNewElf(spw.Color, spw.PosX, spw.PosY);
+                SpawnNewElf(spw.Color, spw.Tile);
             }
         }
 
@@ -41,9 +41,9 @@ namespace Four_Corners.Domain
             return Spawners[new Random().Next(0,Spawners.Count)];
         }
 
-        public void SpawnNewElf(ElfColor color, int sourceX, int sourceY)
+        public void SpawnNewElf(ElfColor color, ITile sourceTile)
         {
-            _elves.Add(Factory.CreateElf(color, sourceX, sourceY));
+            _elves.Add(Factory.CreateElf(color, sourceTile));
         }
     }
 }

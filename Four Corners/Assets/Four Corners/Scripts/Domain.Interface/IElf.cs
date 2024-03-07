@@ -3,10 +3,10 @@ namespace Four_Corners.Domain.Interface
     public interface IElf
     {
         ElfColor Color { get; }
-        int PosX { get; }
-        int PosY { get; }
+        ITile CurrentTile { get; }
 
-        void Move(int newX, int newY);
+        bool Move(ITile tile);
+        void Kill();
     }
 
     public enum ElfColor

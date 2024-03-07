@@ -11,14 +11,19 @@ namespace Four_Corners.Service
             return new Match(spawners);
         }
 
-        public static IElf CreateElf(ElfColor color, int startX, int startY)
+        public static IElf CreateElf(ElfColor color, ITile originTile)
         {
-            return new Elf(color, startX, startY);
+            return new Elf(color, originTile);
         }
 
-        public static ISpawner CreateSpawner(ElfColor color, int startX, int startY)
+        public static ISpawner CreateSpawner(ElfColor color, ITile tile)
         {
-            return new Spawner(color, startX, startY);
+            return new Spawner(color, tile);
+        }
+
+        public static IBoard CreateBoard(IList<ITile> board)
+        {
+            return new Board(board);
         }
     }
 }
