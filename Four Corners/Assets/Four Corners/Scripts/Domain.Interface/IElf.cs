@@ -5,6 +5,8 @@ namespace Four_Corners.Domain.Interface
         ElfColor Color { get; }
         int PosX { get; }
         int PosY { get; }
+
+        void Move(int newX, int newY);
     }
 
     public enum ElfColor

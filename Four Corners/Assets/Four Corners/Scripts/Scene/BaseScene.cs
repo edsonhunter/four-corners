@@ -1,6 +1,8 @@
-﻿namespace Four_Corners.Scene
+﻿using UnityEngine;
+
+namespace Four_Corners.Scene
 {
-    public class BaseScene
+    public abstract class BaseScene : MonoBehaviour
     {
        
     }
