@@ -3,6 +3,7 @@ using Four_Corners.Service.Interface;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Four_Corners.Service
 {
@@ -35,8 +36,8 @@ namespace Four_Corners.Service
                     break;
                 }
 
-                await Task.Delay(new Random().Next(1000, 5000));
-
+                await Task.Delay(new System.Random().Next(1000, 5000));
+                Debug.Log("New elf alive");
                 Partida.SpawnNewElfFromSpawner();
             }
         }

@@ -27,7 +27,7 @@ namespace Four_Corners.Domain
         {
             foreach(var spw in Spawners)
             {
-                spw.SpawnNewElf();
+                SpawnNewElf(spw.Color, spw.PosX, spw.PosY);
             }
         }
 
