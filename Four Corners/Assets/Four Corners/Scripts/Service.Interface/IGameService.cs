@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Four_Corners.Service.Interface
@@ -6,6 +7,6 @@ namespace Four_Corners.Service.Interface
     {
         void CreateMatch();
         void EndGame();
-        Task StartGame();
+        Task StartGame(CancellationToken token);
     }
 }

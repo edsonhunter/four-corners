@@ -1,4 +1,5 @@
 using Four_Corners.Domain.Interface;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -12,6 +13,7 @@ namespace Four_Corners.Domain
         public bool Alive { get; private set; }
 
         public ITile CurrentTile { get; private set; }
+        private CancellationTokenSource cancellationTokenSource;
 
         private Elf()
         {
@@ -25,9 +27,9 @@ namespace Four_Corners.Domain
             Color = color;
             CurrentTile = currentTile;
             Alive = true;
-
-            Task.Run(LifeCicle);
-            Task.Run(MovementLoop);
+            cancellationTokenSource = new CancellationTokenSource();
+            Task.Run(LifeCicle, cancellationTokenSource.Token);
+            Task.Run(MovementLoop, cancellationTokenSource.Token);
         }
 
         public bool Move(ITile tile)
@@ -45,9 +47,9 @@ namespace Four_Corners.Domain
                 {
                     break;
                 }
+                
+                await Task.Delay(new System.Random().Next(1000, 5000), cancellationTokenSource.Token);
                 Debug.Log("I'll move!");
-                await Task.Delay(new System.Random().Next(1000, 5000));
-
                 var tileToMove = CurrentTile.Neighbors[new System.Random().Next(CurrentTile.Neighbors.Count)];
                 tileToMove.MoveToHere(this);
             }
@@ -62,7 +64,7 @@ namespace Four_Corners.Domain
                     break;
                 }
 
-                await Task.Delay(1000);
+                await Task.Delay(1000, cancellationTokenSource.Token);
                 Debug.Log($"I'm elf {Color}-{Id}");
 
                 int tossCoin = new System.Random().Next(0, 100);
@@ -78,6 +80,7 @@ namespace Four_Corners.Domain
         public void Kill()
         {
             Alive = false;
+            cancellationTokenSource.Cancel();
         }
     }
 }

@@ -10,6 +10,9 @@ namespace Four_Corners.Domain.Interface
         IList<ITile> Neighbors { get; }
         IList<IElf> ElvesInTheTile { get; }
 
+        delegate void ElfSpawnDelegate(IElf parent);
+        event ElfSpawnDelegate OnElfSpawn;
+
         void AddNeighbor(ITile tile);
         void MoveToHere(IElf elf);
     }

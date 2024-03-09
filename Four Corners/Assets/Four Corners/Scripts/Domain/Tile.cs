@@ -18,6 +18,9 @@ namespace Four_Corners.Domain
         public IList<IElf> ElvesInTheTile => _elvesInTheTile.AsReadOnly();
         public List<IElf> _elvesInTheTile { get; private set; }
 
+        public event ITile.ElfSpawnDelegate OnElfSpawn { add => _onElfSpawn += value; remove => _onElfSpawn -= value; }
+        private event ITile.ElfSpawnDelegate _onElfSpawn;
+
         private Tile()
         {
             X = -1;
@@ -31,6 +34,7 @@ namespace Four_Corners.Domain
             X = x;
             Y = y;
         }
+
 
         public void MoveToHere(IElf elf)
         {
@@ -53,6 +57,7 @@ namespace Four_Corners.Domain
                 }
 
                 Debug.Log("Time to procriate");
+                _onElfSpawn.Invoke(elf);
                 break;
             }
         }

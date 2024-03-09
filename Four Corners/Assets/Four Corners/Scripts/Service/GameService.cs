@@ -3,6 +3,7 @@ using Four_Corners.Domain.Interface;
 using Four_Corners.Service.Interface;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -13,6 +14,8 @@ namespace Four_Corners.Service
         private IMatch Match { get; set; }
         private IBoard Board { get; set; }
         private IGameConfig Config { get; set; }
+        private object SpawnLock = new object();
+
 
         public GameService(IGameConfig config)
         {
@@ -29,6 +32,7 @@ namespace Four_Corners.Service
                 for (int j = 0; j < Config.Height; j++)
                 {
                     var tile = new Tile(i, j);
+                    tile.OnElfSpawn += SpawnElf;
                     line.Add(tile);
                 }
                 board.Add(line);
@@ -89,7 +93,7 @@ namespace Four_Corners.Service
             Match.StartMatch();
         }
 
-        public async Task StartGame()
+        public async Task StartGame(CancellationToken token)
         {
             while (Match.Running)
             {
@@ -103,17 +107,28 @@ namespace Four_Corners.Service
                     break;
                 }
 
-                await Task.Delay(new System.Random().Next(1000, 5000));
+                await Task.Delay(new System.Random().Next(1000, 5000), token);
+
+                if (!Match.Running)
+                {
+                    break;
+                }
+
                 Debug.Log("New elf alive");
                 Match.SpawnNewElfFromSpawner();
             }
         }
 
+        
+
 
         //Could create an elf from a spawner or from the collision of same color elves
-        private void SpawnElf(ElfColor newColor, int originX, int originY)
+        private void SpawnElf(IElf parent)
         {
-            Match.SpawnNewElfFromSpawner();
+            lock (SpawnLock)
+            {
+                Match.SpawnNewElf(parent.Color, parent.CurrentTile);
+            }
         }
 
         public static ElfColor ChooseNewColor()
