@@ -1,21 +1,22 @@
 ﻿using Four_Corners.Domain.Interface;
+using System;
 using System.Collections.Generic;
 
 namespace Four_Corners.Domain
 {
     public class Board : IBoard
     {
-        public IList<ITile> Tiles => _tiles.AsReadOnly();
-        private List<ITile> _tiles { get; set; }
+        public IList<IList<ITile>> Tiles => _tiles;
+        private IList<IList<ITile>> _tiles { get; set; }
 
         private Board()
         {
-            _tiles = new List<ITile>();
+            _tiles = new List<IList<ITile>>();
         }
 
-        public Board(IList<ITile> tiles)
+        public Board(IList<IList<ITile>> tiles)
         {
-            _tiles = new List<ITile>(tiles);
+            _tiles = new List<IList<ITile>>(tiles);
         }
     }
 }

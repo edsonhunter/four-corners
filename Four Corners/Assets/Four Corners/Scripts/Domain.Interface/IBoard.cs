@@ -4,6 +4,6 @@ namespace Four_Corners.Domain.Interface
 {
     public interface IBoard
     {
-        IList<ITile> Tiles { get; }
+        IList<IList<ITile>> Tiles { get; }
     }
 }

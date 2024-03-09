@@ -27,6 +27,7 @@ namespace Four_Corners.Domain
             Alive = true;
 
             Task.Run(LifeCicle);
+            Task.Run(MovementLoop);
         }
 
         public bool Move(ITile tile)
@@ -34,6 +35,22 @@ namespace Four_Corners.Domain
             CurrentTile = tile;
             Debug.Log($"Ops! The sit is taken? {tile.Occupied}");
             return !tile.Occupied;
+        }
+
+        public async Task MovementLoop()
+        {
+            while (Alive)
+            {
+                if (!Alive)
+                {
+                    break;
+                }
+                Debug.Log("I'll move!");
+                await Task.Delay(new System.Random().Next(1000, 5000));
+
+                var tileToMove = CurrentTile.Neighbors[new System.Random().Next(CurrentTile.Neighbors.Count)];
+                tileToMove.MoveToHere(this);
+            }
         }
 
         public async Task LifeCicle()

@@ -12,6 +12,8 @@ namespace Four_Corners.Domain
         public IList<ISpawner> Spawners => _spawners.AsReadOnly();
         private List<ISpawner> _spawners { get; set; }
 
+        public bool Running { get; private set; }
+
         private Match()
         {
             _elves = new List<IElf>();
@@ -29,6 +31,8 @@ namespace Four_Corners.Domain
             {
                 SpawnNewElf(spw.Color, spw.Tile);
             }
+
+            Running = true;
         }
 
         public void SpawnNewElfFromSpawner()
@@ -44,6 +48,17 @@ namespace Four_Corners.Domain
         public void SpawnNewElf(ElfColor color, ITile sourceTile)
         {
             _elves.Add(Factory.CreateElf(color, sourceTile));
+        }
+
+        public void EndMatch()
+        {
+            Running = false;
+            foreach (var elf in Elves)
+            {
+                elf.Kill();
+            }
+
+            _elves.Clear();
         }
     }
 }

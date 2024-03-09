@@ -12,6 +12,9 @@ namespace Four_Corners.Domain
 
         public bool Occupied => _elvesInTheTile.Count > 0;
 
+        public IList<ITile> Neighbors => _neighbors.AsReadOnly();
+        private List<ITile> _neighbors { get; set; }
+
         public IList<IElf> ElvesInTheTile => _elvesInTheTile.AsReadOnly();
         public List<IElf> _elvesInTheTile { get; private set; }
 
@@ -20,6 +23,7 @@ namespace Four_Corners.Domain
             X = -1;
             Y = -1;
             _elvesInTheTile = new List<IElf>();
+            _neighbors = new List<ITile>();
         }
 
         public Tile(int x, int y) : this()
@@ -51,6 +55,11 @@ namespace Four_Corners.Domain
                 Debug.Log("Time to procriate");
                 break;
             }
+        }
+
+        public void AddNeighbor(ITile tile)
+        {
+            _neighbors.Add(tile);
         }
     }
 }

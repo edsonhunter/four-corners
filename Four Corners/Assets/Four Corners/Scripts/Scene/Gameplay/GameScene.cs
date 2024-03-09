@@ -8,13 +8,19 @@ namespace Four_Corners.Scene.Gameplay
         IGameService GameService { get; set; }
         private void Awake()
         {
-            GameService = new GameService();
+            IConfigService configService = new ConfigService(20,10);
+            GameService = new GameService(configService.Config.GameConfig);
             GameService.CreateMatch();
         }
 
         private void Start()
         {
             GameService.StartGame();
+        }
+
+        private void OnDestroy()
+        {
+            GameService.EndGame();
         }
     }
 }

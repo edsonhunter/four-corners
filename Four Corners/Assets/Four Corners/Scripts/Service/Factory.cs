@@ -21,9 +21,19 @@ namespace Four_Corners.Service
             return new Spawner(color, tile);
         }
 
-        public static IBoard CreateBoard(IList<ITile> board)
+        public static IBoard CreateBoard(IList<IList<ITile>> board)
         {
             return new Board(board);
+        }
+
+        public static IConfig CreateConfig(IGameConfig gameConfig)
+        {
+            return new Config(gameConfig);
+        }
+
+        public static IGameConfig CreateGameConfig(int width, int height)
+        {
+            return new GameConfig(width, height);
         }
     }
 }
