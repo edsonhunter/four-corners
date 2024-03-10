@@ -1,37 +1,50 @@
+using Four_Corners.Domain.Interface;
+using Four_Corners.Manager;
+using Four_Corners.Manager.Interface;
 using Four_Corners.Service;
 using Four_Corners.Service.Interface;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Four_Corners.Scene.Gameplay
 {
     public class GameScene : BaseScene
     {
-        IGameService GameService { get; set; }
+        [field: SerializeField]
+        private GameObject TilePrefab { get; set; }
+        [field: SerializeField]
+        private GameObject ElfPrefab { get; set; }
 
-        private CancellationTokenSource cancellationTokenSource { get; set; }
+        private IGameManager GameManager { get; set; }
+        private IMatch GameMatch { get; set; }
 
         private void Awake()
         {
-            IConfigService configService = new ConfigService(20,10);
-            GameService = new GameService(configService.Config.GameConfig);
-            GameService.CreateMatch();
-
-            cancellationTokenSource = new CancellationTokenSource();
+            GameManager = new GameManager();
+            GameMatch = GameManager.PrepareMatch();
         }
 
         private void Start()
         {
-            Task.Run(async () =>
+            for (int i = 0; i < GameManager.GameConfig.Width; i++)
             {
-                await GameService.StartGame(cancellationTokenSource.Token);
-            }, cancellationTokenSource.Token);
+                for (int j = 0; j < GameManager.GameConfig.Height; j++)
+                {
+                    var tileObject = Instantiate(TilePrefab, this.transform);
+                    var tile = GameMatch.Board.Tiles[i][j];
+                    tileObject.transform.position = new Vector2(tile.X, tile.Y);
+                    tileObject.name = $"{i + 1}:{j + 1}";
+                }
+            }
+
+            GameManager.StartGame();
         }
 
         private void OnDestroy()
         {
-            cancellationTokenSource.Cancel();
-            GameService.EndGame();
+            GameManager.EndGame();
         }
     }
 }
