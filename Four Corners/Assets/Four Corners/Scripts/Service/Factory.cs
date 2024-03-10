@@ -6,9 +6,9 @@ namespace Four_Corners.Service
 {
     public static class Factory
     {
-        public static IMatch CreatePartida(IList<ISpawner> spawners)
+        public static IMatch CreatePartida(IBoard board, IList<ISpawner> spawners)
         {
-            return new Match(spawners);
+            return new Match(board, spawners);
         }
 
         public static IElf CreateElf(ElfColor color, ITile originTile)
