@@ -11,8 +11,9 @@ namespace Four_Corners.Service
 {
     public class GameService : IGameService
     {
-        private IMatch Match { get; set; }
         private IBoard Board { get; set; }
+        private IMatch Match { get; set; }
+        
         private IGameConfig Config { get; set; }
         private object SpawnLock = new object();
 
@@ -33,6 +34,7 @@ namespace Four_Corners.Service
                 {
                     var tile = new Tile(i, j);
                     tile.OnElfSpawn += SpawnElf;
+                    tile.OnElfDestroy += KillElf;
                     line.Add(tile);
                 }
                 board.Add(line);
@@ -76,7 +78,7 @@ namespace Four_Corners.Service
             }            
         }
 
-        public void CreateMatch()
+        public IMatch CreateMatch()
         {
             CreateBoard();
 
@@ -89,8 +91,9 @@ namespace Four_Corners.Service
                     [random.Next(idx, Config.Height)];
                 spawnerList.Add(Factory.CreateSpawner((ElfColor)idx, randomTile));
             }
-            Match = Factory.CreatePartida(spawnerList);
+            Match = Factory.CreatePartida(Board, spawnerList);
             Match.StartMatch();
+            return Match;
         }
 
         public async Task StartGame(CancellationToken token)
@@ -119,15 +122,19 @@ namespace Four_Corners.Service
             }
         }
 
-        
-
-
-        //Could create an elf from a spawner or from the collision of same color elves
         private void SpawnElf(IElf parent)
         {
             lock (SpawnLock)
             {
                 Match.SpawnNewElf(parent.Color, parent.CurrentTile);
+            }
+        }
+
+        private void KillElf(IElf deadElf)
+        {
+            lock(SpawnLock)
+            {
+                Match.RemoveElf(deadElf);
             }
         }
 
