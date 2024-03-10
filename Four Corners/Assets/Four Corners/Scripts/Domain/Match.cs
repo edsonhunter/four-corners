@@ -2,17 +2,20 @@
 using Four_Corners.Service;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Four_Corners.Domain
 {
     public class Match : IMatch
     {
+        public IBoard Board { get; private set; }
         public IList<IElf> Elves => _elves.AsReadOnly();
         private List<IElf> _elves { get; set; }
         public IList<ISpawner> Spawners => _spawners.AsReadOnly();
         private List<ISpawner> _spawners { get; set; }
 
         public bool Running { get; private set; }
+        private object elfLock = new object();
 
         private Match()
         {
@@ -20,14 +23,15 @@ namespace Four_Corners.Domain
             _spawners = new List<ISpawner>();
         }
 
-        public Match(IList<ISpawner> spawners) : this()
+        public Match(IBoard board, IList<ISpawner> spawners) : this()
         {
+            Board = board;
             _spawners = new List<ISpawner>(spawners);
         }
 
         public void StartMatch()
         {
-            foreach(var spw in Spawners)
+            foreach (var spw in Spawners)
             {
                 SpawnNewElf(spw.Color, spw.Tile);
             }
@@ -37,28 +41,39 @@ namespace Four_Corners.Domain
 
         public void SpawnNewElfFromSpawner()
         {
-            _elves.Add(ChooseRandomSpawner().SpawnNewElf());
+            var spawner = ChooseRandomSpawner();
+            SpawnNewElf(spawner.Color, spawner.Tile);
         }
 
         private ISpawner ChooseRandomSpawner()
         {
-            return Spawners[new Random().Next(0,Spawners.Count)];
+            return Spawners[new Random().Next(0, Spawners.Count)];
         }
 
         public void SpawnNewElf(ElfColor color, ITile sourceTile)
         {
-            _elves.Add(Factory.CreateElf(color, sourceTile));
+            lock (elfLock)
+            {
+                _elves.Add(Factory.CreateElf(color, sourceTile));
+            }
+        }
+
+        public void RemoveElf(IElf elf)
+        {
+            lock (elfLock)
+            {
+                _elves.Remove(elf);
+            }
         }
 
         public void EndMatch()
         {
             Running = false;
-            foreach (var elf in Elves)
+            lock (elfLock)
             {
-                elf.Kill();
+                Parallel.ForEach(Elves, elf => { elf.Kill(); });
+                _elves.Clear();
             }
-
-            _elves.Clear();
         }
     }
 }

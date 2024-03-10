@@ -18,8 +18,10 @@ namespace Four_Corners.Domain
         public IList<IElf> ElvesInTheTile => _elvesInTheTile.AsReadOnly();
         public List<IElf> _elvesInTheTile { get; private set; }
 
-        public event ITile.ElfSpawnDelegate OnElfSpawn { add => _onElfSpawn += value; remove => _onElfSpawn -= value; }
-        private event ITile.ElfSpawnDelegate _onElfSpawn;
+        public event ITile.ElfBehaviorDelegate OnElfSpawn { add => _onElfSpawn += value; remove => _onElfSpawn -= value; }
+        private event ITile.ElfBehaviorDelegate _onElfSpawn;
+        public event ITile.ElfBehaviorDelegate OnElfDestroy { add => _onElfDestroy += value; remove => _onElfDestroy -= value; }
+        public event ITile.ElfBehaviorDelegate _onElfDestroy;
 
         private Tile()
         {
@@ -65,6 +67,11 @@ namespace Four_Corners.Domain
         public void AddNeighbor(ITile tile)
         {
             _neighbors.Add(tile);
+        }
+
+        public void RemoveThisElf(IElf elf)
+        {
+            _elvesInTheTile.Remove(elf);
         }
     }
 }

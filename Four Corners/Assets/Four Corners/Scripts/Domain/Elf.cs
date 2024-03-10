@@ -28,12 +28,12 @@ namespace Four_Corners.Domain
             CurrentTile = currentTile;
             Alive = true;
             cancellationTokenSource = new CancellationTokenSource();
-            Task.Run(LifeCicle, cancellationTokenSource.Token);
             Task.Run(MovementLoop, cancellationTokenSource.Token);
         }
 
         public bool Move(ITile tile)
         {
+            CurrentTile.RemoveThisElf(this);
             CurrentTile = tile;
             Debug.Log($"Ops! The sit is taken? {tile.Occupied}");
             return !tile.Occupied;
@@ -47,33 +47,12 @@ namespace Four_Corners.Domain
                 {
                     break;
                 }
-                
+                Debug.Log($"I'm elf {Color}-{Id}");
                 await Task.Delay(new System.Random().Next(1000, 5000), cancellationTokenSource.Token);
-                Debug.Log("I'll move!");
+
+                Debug.Log($"{Id} - I'll move!");
                 var tileToMove = CurrentTile.Neighbors[new System.Random().Next(CurrentTile.Neighbors.Count)];
                 tileToMove.MoveToHere(this);
-            }
-        }
-
-        public async Task LifeCicle()
-        {
-            while (Alive)
-            {
-                if (!Alive)
-                {
-                    break;
-                }
-
-                await Task.Delay(1000, cancellationTokenSource.Token);
-                Debug.Log($"I'm elf {Color}-{Id}");
-
-                int tossCoin = new System.Random().Next(0, 100);
-                if (tossCoin % 2 == 0)
-                {
-                    Alive = false;
-                }
-
-                Debug.Log($"[DEAD] I WAS elf {Color}-{Id}");
             }
         }
 
@@ -81,6 +60,7 @@ namespace Four_Corners.Domain
         {
             Alive = false;
             cancellationTokenSource.Cancel();
+            Debug.Log($"[DEAD] elf {Color}-{Id}");
         }
     }
 }
