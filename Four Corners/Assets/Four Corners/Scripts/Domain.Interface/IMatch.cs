@@ -9,8 +9,9 @@ namespace Four_Corners.Domain.Interface
         IList<ISpawner> Spawners { get; }
         bool Running { get; }
 
-        void SpawnNewElfFromSpawner();
-        void SpawnNewElf(ElfColor color, ITile sourceTile);
+        ISpawner ChooseRandomSpawner();
+        IElf SpawnNewElfFromSpawner();
+        IElf SpawnNewElf(ElfColor color, ITile sourceTile);
         void RemoveElf(IElf elf);
         void StartMatch();
         void EndMatch();

@@ -15,6 +15,9 @@ namespace Four_Corners.Domain
         public ITile CurrentTile { get; private set; }
         private CancellationTokenSource cancellationTokenSource;
 
+        public event IElf.ElfStatusUpdate OnElfStatusUdate { add =>  _onElfStatusUpdate += value; remove => _onElfStatusUpdate -= value; }
+        public IElf.ElfStatusUpdate _onElfStatusUpdate;
+
         private Elf()
         {
             Id = System.Guid.Empty;
@@ -28,6 +31,7 @@ namespace Four_Corners.Domain
             CurrentTile = currentTile;
             Alive = true;
             cancellationTokenSource = new CancellationTokenSource();
+
             Task.Run(MovementLoop, cancellationTokenSource.Token);
         }
 
@@ -35,6 +39,7 @@ namespace Four_Corners.Domain
         {
             CurrentTile.RemoveThisElf(this);
             CurrentTile = tile;
+            _onElfStatusUpdate.Invoke();
             Debug.Log($"Ops! The sit is taken? {tile.Occupied}");
             return !tile.Occupied;
         }
@@ -48,9 +53,9 @@ namespace Four_Corners.Domain
                     break;
                 }
                 Debug.Log($"I'm elf {Color}-{Id}");
-                await Task.Delay(new System.Random().Next(1000, 5000), cancellationTokenSource.Token);
+                await Task.Delay(1000, cancellationTokenSource.Token);
 
-                Debug.Log($"{Id} - I'll move!");
+                Debug.Log($"{Color}-{Id} - I'll move!");
                 var tileToMove = CurrentTile.Neighbors[new System.Random().Next(CurrentTile.Neighbors.Count)];
                 tileToMove.MoveToHere(this);
             }

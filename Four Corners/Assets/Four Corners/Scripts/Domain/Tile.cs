@@ -1,4 +1,5 @@
 ﻿using Four_Corners.Domain.Interface;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,10 +19,12 @@ namespace Four_Corners.Domain
         public IList<IElf> ElvesInTheTile => _elvesInTheTile.AsReadOnly();
         public List<IElf> _elvesInTheTile { get; private set; }
 
-        public event ITile.ElfBehaviorDelegate OnElfSpawn { add => _onElfSpawn += value; remove => _onElfSpawn -= value; }
-        private event ITile.ElfBehaviorDelegate _onElfSpawn;
-        public event ITile.ElfBehaviorDelegate OnElfDestroy { add => _onElfDestroy += value; remove => _onElfDestroy -= value; }
-        public event ITile.ElfBehaviorDelegate _onElfDestroy;
+        public event Action<ElfColor, ITile> OnElfSpawn { add => _onElfSpawn += value; remove => _onElfSpawn -= value; }
+        private Action<ElfColor, ITile> _onElfSpawn;
+        public event Action<IElf> OnElfDestroy { add => _onElfDestroy += value; remove => _onElfDestroy -= value; }
+        public Action<IElf> _onElfDestroy;
+
+        private object ElfMovingHere = new object();
 
         private Tile()
         {
@@ -37,29 +40,32 @@ namespace Four_Corners.Domain
             Y = y;
         }
 
-
         public void MoveToHere(IElf elf)
         {
             if (elf.Move(this))
             {
-                _elvesInTheTile.Add(elf);
+                lock (ElfMovingHere)
+                {
+                    _elvesInTheTile.Add(elf);
+                }
                 return;
             }
 
-            for(int elfIdx = ElvesInTheTile.Count -1; elfIdx >= 0; elfIdx--)
+            for(int elfIdx = ElvesInTheTile.Count -1; elfIdx >= 0;)
             {
                 var elfInTile = ElvesInTheTile[elfIdx];
                 if (elfInTile.Color != elf.Color)
                 {
-                    Debug.Log("Time to DIE!");
                     elfInTile.Kill();
                     elf.Kill();
-                    _elvesInTheTile.Remove(elfInTile);
+                    _onElfDestroy.Invoke(elfInTile);
+                    _onElfDestroy.Invoke(elf);
+
+                    RemoveThisElf(elfInTile);
                     break;
                 }
 
-                Debug.Log("Time to procriate");
-                _onElfSpawn.Invoke(elf);
+                _onElfSpawn.Invoke(elf.Color, elf.CurrentTile);
                 break;
             }
         }
@@ -71,7 +77,10 @@ namespace Four_Corners.Domain
 
         public void RemoveThisElf(IElf elf)
         {
-            _elvesInTheTile.Remove(elf);
+            lock (ElfMovingHere)
+            {
+                _elvesInTheTile.Remove(elf);
+            }
         }
     }
 }

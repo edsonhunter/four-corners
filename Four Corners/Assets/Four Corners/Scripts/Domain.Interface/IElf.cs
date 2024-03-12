@@ -4,6 +4,10 @@ namespace Four_Corners.Domain.Interface
     {
         ElfColor Color { get; }
         ITile CurrentTile { get; }
+        bool Alive { get; }
+
+        delegate void ElfStatusUpdate();
+        event ElfStatusUpdate OnElfStatusUdate;
 
         bool Move(ITile tile);
         void Kill();

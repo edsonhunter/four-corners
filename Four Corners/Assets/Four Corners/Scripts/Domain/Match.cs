@@ -31,30 +31,27 @@ namespace Four_Corners.Domain
 
         public void StartMatch()
         {
-            foreach (var spw in Spawners)
-            {
-                SpawnNewElf(spw.Color, spw.Tile);
-            }
-
             Running = true;
         }
 
-        public void SpawnNewElfFromSpawner()
+        public IElf SpawnNewElfFromSpawner()
         {
             var spawner = ChooseRandomSpawner();
-            SpawnNewElf(spawner.Color, spawner.Tile);
+            return SpawnNewElf(spawner.Color, spawner.Tile);
         }
 
-        private ISpawner ChooseRandomSpawner()
+        public ISpawner ChooseRandomSpawner()
         {
             return Spawners[new Random().Next(0, Spawners.Count)];
         }
 
-        public void SpawnNewElf(ElfColor color, ITile sourceTile)
+        public IElf SpawnNewElf(ElfColor color, ITile sourceTile)
         {
             lock (elfLock)
             {
-                _elves.Add(Factory.CreateElf(color, sourceTile));
+                var babyElf = Factory.CreateElf(color, sourceTile);
+                _elves.Add(babyElf);
+                return babyElf;
             }
         }
 
@@ -74,6 +71,8 @@ namespace Four_Corners.Domain
                 Parallel.ForEach(Elves, elf => { elf.Kill(); });
                 _elves.Clear();
             }
+
+            Parallel.ForEach(Spawners, spw => { spw.EndGame(); });
         }
     }
 }

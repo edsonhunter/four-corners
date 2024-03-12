@@ -1,5 +1,6 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Four_Corners.Domain.Interface
 {
@@ -7,7 +8,10 @@ namespace Four_Corners.Domain.Interface
     {
         ElfColor Color { get; }
         ITile Tile { get; }
+        event Action<ElfColor, ITile> OnElfSpawn;
 
-        IElf SpawnNewElf();
+        void StartGame(CancellationToken token);
+        void EndGame();
+        IElf SpawnElf();
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Four_Corners.Domain.Interface
 {
@@ -10,9 +11,8 @@ namespace Four_Corners.Domain.Interface
         IList<ITile> Neighbors { get; }
         IList<IElf> ElvesInTheTile { get; }
 
-        delegate void ElfBehaviorDelegate(IElf parent);
-        event ElfBehaviorDelegate OnElfSpawn;
-        event ElfBehaviorDelegate OnElfDestroy;
+        event Action<ElfColor, ITile> OnElfSpawn;
+        event Action<IElf> OnElfDestroy;
 
         void AddNeighbor(ITile tile);
         void MoveToHere(IElf elf);
