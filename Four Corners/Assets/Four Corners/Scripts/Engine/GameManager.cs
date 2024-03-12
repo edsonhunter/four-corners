@@ -2,6 +2,7 @@ using Four_Corners.Domain.Interface;
 using Four_Corners.Manager.Interface;
 using Four_Corners.Service;
 using Four_Corners.Service.Interface;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -17,26 +18,19 @@ namespace Four_Corners.Manager
 
         private CancellationTokenSource cancellationTokenSource { get; set; }
 
-        public GameManager() {
 
-        }
-
-        public IMatch PrepareMatch()
+        public async Task<IMatch> PrepareMatch(Action<IElf> onElfSpawn)
         {
-            cancellationTokenSource = new CancellationTokenSource();
-
             ConfigService = new ConfigService(10, 5);
             GameConfig = ConfigService.Config.GameConfig;
-            GameService = new GameService(GameConfig);
-            return GameService.CreateMatch();
+            GameService = new GameService(GameConfig, onElfSpawn);
+            return await GameService.CreateMatch();
         }
 
         public void StartGame()
         {
-            Task.Run(async () =>
-            {
-                await GameService.StartGame(cancellationTokenSource.Token);
-            }, cancellationTokenSource.Token);
+            cancellationTokenSource = new CancellationTokenSource();
+            GameService.StartGame(cancellationTokenSource.Token);
         }
 
         public void EndGame()

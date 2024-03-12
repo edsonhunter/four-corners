@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Unity.Transforms;
 using UnityEngine;
 
 namespace Four_Corners.Service
@@ -16,11 +17,12 @@ namespace Four_Corners.Service
         
         private IGameConfig Config { get; set; }
         private object SpawnLock = new object();
+        private Action<IElf> NewElfSpawning { get; set; }
 
-
-        public GameService(IGameConfig config)
+        public GameService(IGameConfig config, Action<IElf> onElfSpawn)
         {
             Config = config;
+            NewElfSpawning = onElfSpawn;
         }
 
         private void CreateBoard()
@@ -78,55 +80,50 @@ namespace Four_Corners.Service
             }            
         }
 
-        public IMatch CreateMatch()
+        public Task<IMatch> CreateMatch()
         {
+            TaskCompletionSource<IMatch> tcs = new TaskCompletionSource<IMatch>();
+
             CreateBoard();
 
             var spawnerList = new List<ISpawner>();
-            for (int idx = 0; idx < Enum.GetValues(typeof(ElfColor)).Length; idx++)
+            for (int idx = 0; idx < Enum.GetValues(typeof(ElfColor)).Length - 1; idx++)
             {
                 var random = new System.Random();
                 var randomTile = Board.Tiles
                     [random.Next(idx, Config.Width)]
                     [random.Next(idx, Config.Height)];
-                spawnerList.Add(Factory.CreateSpawner((ElfColor)idx, randomTile));
+                var spawner = Factory.CreateSpawner((ElfColor)idx, randomTile);
+                spawner.OnElfSpawn += SpawnElf;
+                spawnerList.Add(spawner);
             }
             Match = Factory.CreatePartida(Board, spawnerList);
-            Match.StartMatch();
-            return Match;
+           
+            foreach(var spawner in spawnerList)
+            {
+                spawner.SpawnElf();
+            }
+            tcs.SetResult(Match);
+
+            return tcs.Task;
         }
 
-        public async Task StartGame(CancellationToken token)
+        public void StartGame(CancellationToken token)
         {
-            while (Match.Running)
+            Match.StartMatch();
+
+            foreach (var spawner in Match.Spawners)
             {
-                if (Match.Elves.Count <= 1)
-                {
-                    break;
-                }
-
-                if (!Match.Running)
-                {
-                    break;
-                }
-
-                await Task.Delay(new System.Random().Next(1000, 5000), token);
-
-                if (!Match.Running)
-                {
-                    break;
-                }
-
-                Debug.Log("New elf alive");
-                Match.SpawnNewElfFromSpawner();
+                spawner.StartGame(token);
             }
         }
 
-        private void SpawnElf(IElf parent)
+        private void SpawnElf(ElfColor color, ITile originTile)
         {
             lock (SpawnLock)
             {
-                Match.SpawnNewElf(parent.Color, parent.CurrentTile);
+                var babyElf = Match.SpawnNewElf(color, originTile);
+                NewElfSpawning(babyElf);
             }
         }
 

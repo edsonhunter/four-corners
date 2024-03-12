@@ -6,8 +6,8 @@ namespace Four_Corners.Service.Interface
 {
     public interface IGameService : IService
     {
-        IMatch CreateMatch();
+        Task<IMatch> CreateMatch();
+        void StartGame(CancellationToken token);
         void EndGame();
-        Task StartGame(CancellationToken token);
     }
 }
