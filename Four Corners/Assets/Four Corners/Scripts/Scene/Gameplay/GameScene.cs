@@ -1,11 +1,6 @@
 using Four_Corners.Domain.Interface;
 using Four_Corners.Manager;
 using Four_Corners.Manager.Interface;
-using Four_Corners.Service;
-using Four_Corners.Service.Interface;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Four_Corners.Scene.Gameplay
@@ -13,21 +8,20 @@ namespace Four_Corners.Scene.Gameplay
     public class GameScene : BaseScene
     {
         [field: SerializeField]
+        private GameManager GameManager { get; set; }
+        [field: SerializeField]
         private GameObject TilePrefab { get; set; }
         [field: SerializeField]
-        private GameObject ElfPrefab { get; set; }
+        private ElfController ElfPrefab { get; set; }
 
-        private IGameManager GameManager { get; set; }
         private IMatch GameMatch { get; set; }
 
-        private void Awake()
-        {
-            GameManager = new GameManager();
-            GameMatch = GameManager.PrepareMatch();
-        }
 
-        private void Start()
+        private async void Start()
         {
+            var result = await GameManager.PrepareMatch(SpawnNewElf);
+            GameMatch = result;
+
             for (int i = 0; i < GameManager.GameConfig.Width; i++)
             {
                 for (int j = 0; j < GameManager.GameConfig.Height; j++)
@@ -45,6 +39,13 @@ namespace Four_Corners.Scene.Gameplay
         private void OnDestroy()
         {
             GameManager.EndGame();
+        }
+
+        private void SpawnNewElf(IElf elf)
+        {
+            ElfController elfObj = Instantiate(ElfPrefab, 
+                new Vector3(elf.CurrentTile.X, 0, elf.CurrentTile.Y), Quaternion.identity, transform);
+            elfObj.Init(elf);
         }
     }
 }
